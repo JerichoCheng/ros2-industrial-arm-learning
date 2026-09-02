@@ -21,7 +21,7 @@
 
 | 周次 | 主题 | 状态 | 产出 |
 |---|---|---|---|
-| Week 0 | 环境搭建（WSL2 + ROS 2 Jazzy） | ⬜ 未开始 | — |
+| Week 0 | 环境搭建（WSL2 + ROS 2 Jazzy） | ✅ 已完成 | — |
 | Week 1-2 | C++ 速成（面向 C 基础） | ⬜ 未开始 | [`cpp_warmup/`](./cpp_warmup/) |
 | Week 3 | ROS 2 核心体系：功能包 / 节点 | ⬜ 未开始 | [`ros2_ws/src/`](./ros2_ws/src/) |
 | Week 4 | 基础通信：topic / service / launch / 参数 | ⬜ 未开始 | — |
