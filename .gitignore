@@ -1,0 +1,40 @@
+# ---- ROS 2 / colcon ----
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# ---- C++ 编译产物 ----
+build/
+cmake-build-*/
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+
+# ---- CMake ----
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---- 系统文件 ----
+.DS_Store
+Thumbs.db
+
+# ---- rosbag2 录制文件（体积大，通常不入库）----
+*.db3
+*.mcap
+rosbag2_*/
+
+# ---- 日志 ----
+*.log

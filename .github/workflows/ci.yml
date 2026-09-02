@@ -1,0 +1,31 @@
+name: build-cpp-warmup
+
+# 目前只对 cpp_warmup/（不依赖 ROS 2）做构建检查，
+# ros2_ws/ 的 colcon 构建检查等 Week 3 有实际功能包后再补
+# （可以用 ros-tooling/action-ros-ci）。
+
+on:
+  push:
+    paths:
+      - "cpp_warmup/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "cpp_warmup/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project:
+          - cpp_warmup/week01_sensor_logger
+          - cpp_warmup/week02_sensor_hierarchy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S ${{ matrix.project }} -B ${{ matrix.project }}/build
+
+      - name: Build
+        run: cmake --build ${{ matrix.project }}/build
