@@ -13,6 +13,11 @@
 - namespace 的作用
 - iostream 替代 stdio 的写法
 
+### Day 2
+- 引用 `&`：绑定后不能换目标，本质是变量的别名，不是"存地址的变量"
+- const 正确性：`const T&` 传大对象既省拷贝又防误改；引用/指针的 const 参与重载判断，按值传参的 const 不参与
+- 函数重载：`process(int&)` 和 `process(const int&)` 是合法的两个重载
+- 默认参数：必须从右往左连续，`foo(int a=1, int b)` 编译报错
 
 
 ## 卡在哪 / 怎么解决的
