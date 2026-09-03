@@ -1,23 +1,23 @@
-# Week 1 小项目：传感器数据记录器
+# Week 1 Mini-Project: Sensor Data Logger
 
-## 目标
+## Goal
 
-用一个 `Sensor` 类 + `std::vector<std::shared_ptr<Sensor>>` 管理多个传感器实例，串联本周学到的：
-- `class` 封装、访问控制、构造/析构函数
-- 引用 `&` 与 `const` 正确性
-- RAII 思想 + `std::shared_ptr`
-- STL：`std::string`、`std::vector`、基于范围的 for 循环
+Build a `Sensor` class managed via `std::vector<std::shared_ptr<Sensor>>`, tying together what I'm learning this week:
+- `class` encapsulation, access control, constructors/destructors
+- References `&` and `const`-correctness
+- RAII thinking + `std::shared_ptr`
+- STL: `std::string`, `std::vector`, range-based for loops
 
-## 要求
+## Requirements
 
-1. `Sensor` 类至少包含：名称（`std::string`）、当前读数（`double`）、一个 `read()` 方法（模拟读数变化）
-2. 用 `std::vector<std::shared_ptr<Sensor>>` 管理若干个传感器实例
-3. 遍历 vector，用基于范围的 for 循环打印每个传感器的状态
-4. 观察对象析构的时机（可以在析构函数里打印一句话验证 `shared_ptr` 何时释放对象）
+1. `Sensor` should have at least: a name (`std::string`), a current reading (`double`), and a `read()` method that simulates a changing reading
+2. Manage several sensor instances with `std::vector<std::shared_ptr<Sensor>>`
+3. Iterate the vector with a range-based for loop, printing each sensor's state
+4. Observe when destruction happens (print something in the destructor to see exactly when `shared_ptr` releases the object)
 
-`src/main.cpp` 里已经搭好了类骨架和 `TODO` 标记，把 `TODO` 部分补完就是这周的产出。不要照抄现成代码——卡住了对着 [learncpp.com](https://www.learncpp.com/) 查、或翻教材对应章节，比直接抄一遍收获大得多。
+`src/main.cpp` already has the class skeleton with `TODO` markers — filling those in is this week's actual output. Don't copy a finished solution off the internet — getting stuck and working it out via [learncpp.com](https://www.learncpp.com/) or the corresponding textbook chapter is worth a lot more than typing out someone else's answer.
 
-## 编译运行
+## Build & run
 
 ```bash
 mkdir build && cd build
@@ -26,8 +26,8 @@ make
 ./sensor_logger
 ```
 
-## 检查点自查
+## Self-check
 
-- [ ] 能说清楚这里为什么用 `shared_ptr` 而不是裸指针或直接用对象
-- [ ] 编译没有警告（`-Wall` 打开的情况下）
-- [ ] 程序退出时能在终端看到析构函数被正确调用
+- [ ] Can explain why `shared_ptr` is used here instead of a raw pointer or a plain object
+- [ ] Compiles cleanly with no warnings (with `-Wall` on)
+- [ ] Destructors fire correctly and visibly when the program exits

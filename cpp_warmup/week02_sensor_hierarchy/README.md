@@ -1,24 +1,24 @@
-# Week 2 小项目：传感器继承体系
+# Week 2 Mini-Project: Sensor Inheritance Hierarchy
 
-## 目标
+## Goal
 
-把第 1 周的 `Sensor` 改造成继承体系：`TemperatureSensor : public Sensor`、`DistanceSensor : public Sensor`，串联本周学到的：
-- 继承与多态：`virtual` 函数、`override`、纯虚函数（抽象基类）
-- Lambda 表达式 + `std::function`
-- 手写 CMakeLists.txt（不依赖 ROS 2，验证真的懂构建流程）
+Turn Week 1's `Sensor` into an inheritance hierarchy: `TemperatureSensor : public Sensor`, `DistanceSensor : public Sensor`, tying together what I'm learning this week:
+- Inheritance and polymorphism: `virtual` functions, `override`, pure virtual functions (abstract base classes)
+- Lambda expressions + `std::function`
+- Hand-writing a CMakeLists.txt (no ROS 2 dependency, to actually verify I understand the build process)
 
-这是检验第 1-2 周成果的标准：不是"看懂了"，而是"编译通过、跑得动"。
+This is the real test of Weeks 1-2: not "I get it," but "it compiles and runs."
 
-## 要求
+## Requirements
 
-1. `Sensor` 改成抽象基类：至少有一个纯虚函数 `virtual double read() = 0;`
-2. `TemperatureSensor`、`DistanceSensor` 各自 `override read()`，返回不同风格的模拟数据
-3. 用 `std::vector<std::shared_ptr<Sensor>>` 统一管理两种子类实例（体会多态：通过基类指针调用，实际执行子类的实现）
-4. 用一个 `std::function<void(const Sensor&)>` 类型的回调（可以传 lambda），对每个传感器做一次"处理"（比如超过阈值就打印警告）
+1. Turn `Sensor` into an abstract base class: at least one pure virtual function, `virtual double read() = 0;`
+2. `TemperatureSensor` and `DistanceSensor` each `override read()`, returning a different flavor of simulated data
+3. Manage both subclass types uniformly via `std::vector<std::shared_ptr<Sensor>>` (this is where you feel polymorphism: calling through a base-class pointer actually runs the subclass's implementation)
+4. Use a `std::function<void(const Sensor&)>` callback (pass it a lambda) to "process" each sensor — e.g. print a warning if a reading exceeds some threshold
 
-`src/main.cpp` 里已经搭好骨架，把 `TODO` 补完。
+`src/main.cpp` already has the skeleton — fill in the `TODO`s.
 
-## 编译运行
+## Build & run
 
 ```bash
 mkdir build && cd build
@@ -27,8 +27,8 @@ make
 ./sensor_hierarchy
 ```
 
-## 检查点自查
+## Self-check
 
-- [ ] 能解释清楚为什么基类析构函数要写成 `virtual`（想一想：如果不写会发生什么）
-- [ ] 能用一句话说清楚"纯虚函数"和"普通虚函数"的区别
-- [ ] lambda 回调能正常工作，且能说清 `[this]`、`[&]`、`[=]` 捕获方式的区别
+- [ ] Can explain clearly why the base class destructor needs to be `virtual` (think through what happens if it isn't)
+- [ ] Can explain the difference between a "pure virtual function" and a regular virtual function in one sentence
+- [ ] The lambda callback works correctly, and I can explain the difference between `[this]`, `[&]`, and `[=]` capture modes
