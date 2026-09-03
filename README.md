@@ -3,7 +3,7 @@
 > Documenting my 8-week journey from zero C++ experience to building a simplified simulated industrial-arm grasping demo with ROS 2.
 > Textbook: *ROS 2 Robot Programming in Practice — Modern C++ and Python 3* · Environment: Windows + WSL2 + Ubuntu 24.04 + ROS 2 Jazzy
 
-[![Progress](https://img.shields.io/badge/progress-week%200%2F8-lightgrey)](./ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-week%201%2F8-yellow)](./ROADMAP.md)
 [![ROS2](https://img.shields.io/badge/ROS%202-Jazzy-blue)](https://docs.ros.org/en/jazzy/)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
