@@ -1,131 +1,145 @@
-# 8 周学习路线图
+# 8-Week Learning Roadmap
 
-> 学习者背景：已有 Python / C 基础，C++ 零基础
-> 项目方向：工业机械臂仿真抓取 + 轨迹规划
-> 开发环境：Windows + WSL2 + Ubuntu 24.04 + ROS 2 Jazzy
+> Background: solid Python / C, zero C++ experience
+> Project direction: industrial robotic arm — simulated grasping + trajectory planning
+> Dev environment: Windows + WSL2 + Ubuntu 24.04 + ROS 2 Jazzy
+> Primary textbook: *ROS 2 Robot Programming in Practice — Modern C++ and Python 3* (Textbook ①, main reference for Weeks 3-5 and 8)
+> Supplementary textbook: *ROS 2 Intelligent Robot Development in Practice* (Textbook ②, main reference for Week 6 URDF/Gazebo simulation; Ch2 communication sections useful as a cross-reference; Ch7 vision/YOLO used in the post-8-week deepening track)
+>
+> Textbook ② is fundamentally a mobile-robot (wheeled-base) textbook, not an arm textbook. Its Ch5-6 (motor drivers, encoders, differential-drive kinematics) and Ch8-9 (SLAM, Nav2 navigation) aren't relevant to the arm and won't be used in the 8-week plan.
 
-## 总览
+## Overview
 
 ```
-第0天      环境搭建（WSL2 + Ubuntu 24.04 + ROS 2 Jazzy）
-第1-2周    C++ 速成（面向已有 C 基础）
-第3周      ROS 2 核心体系：构建系统 / 功能包 / 节点
-第4周      ROS 2 基础通信：topic / service + launch/参数
-第5周      ROS 2 扩展通信：action / 自定义接口 / tf2
-第6周      仿真环境：URDF + Gazebo + ros2_control
-第7周      MoveIt2 运动规划入门
-第8周      项目整合：抓取 Demo + 调试工具
+Day 0        Environment setup (WSL2 + Ubuntu 24.04 + ROS 2 Jazzy)
+Week 1-2     C++ crash course (building on existing C background)
+Week 3       ROS 2 core concepts: build system / packages / nodes
+Week 4       ROS 2 basic communication: topic / service + launch/params
+Week 5       ROS 2 extended communication: action / custom interfaces / tf2
+Week 6       Simulation environment: URDF + Gazebo + ros2_control (Textbook ② Ch4-led)
+Week 7       Intro to MoveIt2 motion planning
+Week 8       Project integration: grasping demo + debugging tools
 ```
 
 ---
 
-## Week 0：环境搭建
+## Week 0: Environment Setup
 
-- [ ] 安装 WSL2，发行版 Ubuntu 24.04 LTS
-- [ ] 安装 ROS 2 Jazzy Desktop（`sudo apt install ros-jazzy-desktop`）
-- [ ] VS Code + Remote-WSL + C/C++ 插件 + ROS 插件
-- [ ] 配置 Git，建好本仓库
-- [ ] 验证：`ros2 topic list` 正常、`rviz2` 能弹窗
+- [ ] Install WSL2, distro Ubuntu 24.04 LTS
+- [ ] Install ROS 2 Jazzy Desktop (`sudo apt install ros-jazzy-desktop`)
+- [ ] VS Code + Remote-WSL + C/C++ extension + ROS extension
+- [ ] Configure Git, set up this repo
+- [ ] Verify: `ros2 topic list` works, `rviz2` opens a window
 
-**检查点**：`ros2 run demo_nodes_cpp talker` 和 `listener` 能正常通信。
-
----
-
-## Week 1-2：C++ 速成
-
-目标：具备"读懂并写出 ROS 2 C++ 代码"所需的最小能力集，重点是 C 里没有、但 ROS 2 代码里高频出现的部分（引用、RAII/智能指针、STL、继承多态、lambda、CMake）。
-
-**Week 1 小项目**：`Sensor` 类 + `std::vector<std::shared_ptr<Sensor>>` 管理多个传感器实例 → 对应 [`cpp_warmup/week01_sensor_logger/`](./cpp_warmup/week01_sensor_logger/)
-
-**Week 2 小项目**：继承体系 `TemperatureSensor : public Sensor`、`DistanceSensor : public Sensor`，纯手写 CMakeLists.txt 编译 → 对应 [`cpp_warmup/week02_sensor_hierarchy/`](./cpp_warmup/week02_sensor_hierarchy/)
-
-**检查点**：能独立写出一个包含至少两层继承、用 `shared_ptr` 管理对象、用 lambda 做回调的 C++ 小程序，手写 CMakeLists.txt 编译成功。
+**Checkpoint**: `ros2 run demo_nodes_cpp talker` and `listener` can communicate normally.
 
 ---
 
-## Week 3：ROS 2 核心体系
+## Week 1-2: C++ Crash Course
 
-- 创建第一个 `ros2_ws` workspace（`ros2_ws/src/`）
-- `ros2 pkg create` 创建 C++ 功能包
-- 手写节点类（继承 `rclcpp::Node`），`colcon build` + `ros2 run`
-- `ros2 node list` / `ros2 node info` 观察节点
+Goal: build the minimum C++ skill set needed to read and write ROS 2 C++ code, focusing on what C doesn't have but ROS 2 code uses constantly (references, RAII/smart pointers, STL, inheritance & polymorphism, lambdas, CMake).
 
-**检查点**：功能包能编译、节点能跑、能被 `ros2 node info` 查到。
+**Week 1 mini-project**: `Sensor` class + `std::vector<std::shared_ptr<Sensor>>` managing multiple sensor instances → [`cpp_warmup/week01_sensor_logger/`](./cpp_warmup/week01_sensor_logger/)
 
----
+**Week 2 mini-project**: inheritance hierarchy `TemperatureSensor : public Sensor`, `DistanceSensor : public Sensor`, hand-written CMakeLists.txt → [`cpp_warmup/week02_sensor_hierarchy/`](./cpp_warmup/week02_sensor_hierarchy/)
 
-## Week 4：基础通信 + 启动与参数
-
-- topic 发布订阅、QoS 基础
-- service 服务端/客户端
-- launch 脚本、参数系统（YAML）
-
-**检查点**：独立写出"发布者+订阅者+service+launch 文件"最小组合，`ros2 launch` 一键拉起。
+**Checkpoint**: independently write a C++ program with at least two levels of inheritance, using `shared_ptr` to manage objects and a lambda as a callback, and compile it successfully with a hand-written CMakeLists.txt.
 
 ---
 
-## Week 5：扩展通信 + 坐标变换
+## Week 3: ROS 2 Core Concepts
 
-- action 通信（服务端/客户端、反馈/状态/结果）
-- 自定义接口（`.msg`/`.srv`/`.action`）
-- tf2 坐标系统（静态/动态坐标变换）
+- Create your first `ros2_ws` workspace (`ros2_ws/src/`)
+- Create a C++ package with `ros2 pkg create`
+- Hand-write a node class (inheriting `rclcpp::Node`), `colcon build` + `ros2 run`
+- Inspect nodes with `ros2 node list` / `ros2 node info`
 
-**检查点**：能解释 topic / service / action 的区别，独立写出 action 服务端-客户端 demo。
+**Optional cross-reference**: when Textbook ① moves too fast on something, Textbook ② Ch2.1-2.4 (workspace/package/node, covered in both Python and C++) offers another angle.
 
----
-
-## Week 6：仿真环境（教材外，扩展模块）
-
-- URDF 建模：`robot_state_publisher` + `joint_state_publisher_gui` 可视化机械臂骨架
-  - 建议直接用 MoveIt2 官方教程自带的 Franka Panda 模型，不从零设计 URDF
-- Gazebo 仿真：spawn 模型进 Gazebo Harmonic
-- ros2_control：`joint_trajectory_controller` 基础
-
-**风险提示**：WSL2 下 Gazebo/GPU 渲染容易卡顿，退路是只做 RViz2 + MoveIt2 的虚拟规划场景，不做物理仿真。
-
-**检查点**：RViz2 里能看到可拖动关节的骨架，Gazebo 里能 spawn 出来，能通过命令行让某关节转动。
+**Checkpoint**: the package builds, the node runs, and it shows up in `ros2 node info`.
 
 ---
 
-## Week 7：MoveIt2 运动规划入门
+## Week 4: Basic Communication + Launch & Parameters
 
-- 安装 MoveIt2，跟随官方 Getting Started 教程
-- 理解 planning group、`move_group` 接口
-- RViz2 Motion Planning 插件手动规划
-- 写 C++ 节点，用 `MoveGroupInterface` 编程方式触发运动规划
+- Topic pub/sub, basic QoS
+- Service server/client
+- Launch scripts, parameter system (YAML)
 
-**检查点**：自己写的 C++ 节点能让 Panda 在仿真里移动到指定位姿。
+**Optional cross-reference**: Textbook ② Ch2.5-2.6 (topics/services), Ch2.9 (parameters), Ch3.1 (Launch) — all covered in both Python and C++.
 
----
-
-## Week 8：项目整合
-
-- GDB 调试、ros2_tracing 了解
-- rosbag2 录制/回放
-- `rqt_graph`、`ros2 topic echo` 排查连通性
-
-**最终产出**：
-- [ ] C++ 节点：预抓取位姿 → 闭合夹爪 → 放置位姿 → 张开夹爪
-- [ ] 一键 launch 文件
-- [ ] 项目 README（结构、运行方式、踩坑记录）
-- [ ] 演示视频（30-60 秒，建议放进简历/作品集）
+**Checkpoint**: independently write a minimal "publisher + subscriber + service + launch file" combo that comes up in one shot via `ros2 launch`.
 
 ---
 
-## 8 周后的深化方向（可选）
+## Week 5: Extended Communication + Coordinate Transforms
 
-- 结合 RGB-D 相机做真实物体识别定位
-- 更复杂轨迹规划：避障、笛卡尔路径、MoveIt Task Constructor
-- 换成 UR5e 等更贴近工业场景的机械臂
-- 补教材剩余章节：插件系统、组件系统、生命周期节点、单元测试
-- 实物部署（真实机械臂 / Jetson）
-- 给项目加单元测试 + GitHub Actions CI + 代码规范检查
+- Action communication (server/client, feedback/status/result)
+- Custom interfaces (`.msg`/`.srv`/`.action`)
+- tf2 coordinate system (static/dynamic transforms)
+
+**Optional cross-reference**: Textbook ② Ch2.8 (actions), Ch3.2 (tf frame management, including static/dynamic broadcasting and listening in C++) — this section specifically uses "industrial-robot base frame / tool frame / object frame" as its example, which fits the arm project better than Textbook ①. Worth reading.
+
+**Checkpoint**: can explain the difference between topic / service / action, and independently write an action server-client demo.
 
 ---
 
-## 学习方法提醒
+## Week 6: Simulation Environment (Textbook ② Ch4 + extensions)
 
-- 每天结束留 10 分钟写"今天卡在哪"（对应 `docs/weekly-log/`）
-- 优先看官方文档（docs.ros.org、moveit.picknik.ai），教材成书较早，命令可能已随版本更新
-- Week 1-2 不用纠结完全搞懂指针/引用底层机制，够用就行
-- 卡住超过 1 小时就换思路：看别人代码、退回上一版本，或先记录到"待解决清单"
+The goal this week is to bring an arm "to life" in simulation. **URDF/XACRO/Gazebo now has a proper textbook reference — use Textbook ② Chapter 4** instead of figuring it out from scratch; `ros2_control` still isn't covered in depth by either textbook, so that part remains self-directed.
+
+- Textbook ② Ch4.2-4.3: URDF modeling basics — link/joint syntax. The book's examples use a mobile robot, but the syntax is generic and transfers directly to an arm's structure (a chain of revolute/continuous joints)
+- Textbook ② Ch4.4: XACRO optimization — using variables and macros to cut down repetitive URDF code, which saves real time given how many joints an arm has
+- Textbook ② Ch4.5-4.6: filling in physical parameters, adding controller plugins, loading the model into Gazebo, motion-control simulation
+  - **Suggestion**: once you've learned the syntax and workflow, don't model an arm from scratch — use the Franka Panda model bundled with the official MoveIt2 tutorials, or the examples in the `moveit2_tutorials` repo. The textbook teaches you to read/modify a model, not draw one from zero; spend the saved time on understanding concepts instead of tweaking coordinates
+- `ros2_control` basics (self-directed, neither textbook covers this in depth): understand what `joint_trajectory_controller` does, and be able to send a joint a motion command from the command line and see it move in Gazebo
+
+**Risk note**: Gazebo/GPU rendering tends to lag under WSL2. The fallback is to do everything as a virtual planning scenario in RViz2 + MoveIt2, skipping physics simulation entirely.
+
+**Checkpoint**: RViz2 shows a draggable-joint skeleton, the model spawns in Gazebo, and a joint can be moved via command line.
+
+---
+
+## Week 7: Intro to MoveIt2 Motion Planning
+
+- Install MoveIt2, follow the official Getting Started tutorial
+- Understand planning groups and the `move_group` interface
+- Manual planning via the RViz2 Motion Planning plugin
+- Write a C++ node that triggers motion planning programmatically using `MoveGroupInterface`
+
+**Checkpoint**: your own C++ node can move the Panda to a specified pose in simulation.
+
+---
+
+## Week 8: Project Integration
+
+- GDB debugging, a look at ros2_tracing
+- rosbag2 recording/playback
+- Troubleshoot connectivity with `rqt_graph`, `ros2 topic echo`
+
+**Final deliverable**:
+- [ ] A C++ node: pre-grasp pose → close gripper → place pose → open gripper
+- [ ] A single launch file that brings everything up
+- [ ] Project README (structure, how to run, lessons learned)
+- [ ] A demo video (30-60 seconds, worth keeping for your resume/portfolio)
+
+---
+
+## Post-8-Week Deepening Directions (optional)
+
+- More sophisticated trajectory planning: obstacle avoidance, Cartesian paths, MoveIt Task Constructor
+- **Real grasping (visual perception) — now has a concrete textbook reference**: Textbook ② Ch7 systematically covers camera calibration (7.2), using OpenCV in ROS 2 (7.3), and deep-learning/YOLO object detection (7.6-7.7). Working through these in order gets you a full "camera detects object position → feeds it to MoveIt2 for grasp planning" pipeline
+- Swap the Panda for a more "industrial" arm like the UR5e
+- Fill in remaining chapters of Textbook ①: plugin system, component system, lifecycle nodes, unit testing
+- Real-world deployment (a physical arm / Jetson)
+- Add unit tests + GitHub Actions CI + linting to the project
+- **Optional: extend into mobile robotics / mobile manipulation**: if you later want the arm "on the move" (mounted on a mobile base for mobile grasping), Textbook ② has a full path ready — Ch5-6 (motor drivers/encoders/differential-drive kinematics, hardware-facing), Ch8 (SLAM mapping), Ch9 (Nav2 autonomous navigation). This is its own substantial direction — worth planning separately once the 8-week MVP is done and you're genuinely interested
+
+---
+
+## Study Method Reminders
+
+- Spend 10 minutes at the end of each day writing down "what I got stuck on" (goes in `docs/weekly-log/`)
+- Prefer official docs (docs.ros.org, moveit.picknik.ai) — the textbooks were written earlier and commands may have shifted since
+- Don't get hung up in Week 1-2 on fully understanding the low-level mechanics of pointers/references — good enough is good enough
+- If you're stuck for more than an hour, switch approach: read someone else's code, roll back to the last working version, or log it to a "to resolve" list
