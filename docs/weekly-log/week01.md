@@ -32,6 +32,12 @@
 - shared_ptr：引用计数共享所有权，use_count() 验证计数增减，reset() 立即触发释放
 - 优先用 make_shared 而非 new + shared_ptr 构造（单次分配、异常安全）
 
+### Day 5
+- std::string:动态扩容(RAII 管理堆内存)、size() vs capacity()
+- std::vector:动态数组、push_back()、[](不检查越界,UB)vs .at()(检查越界,抛异常)
+- 基于范围的 for:for (const auto& x : container) 的写法和"避免拷贝"的原因
+- 优迭代器:begin()/end()(尾后位置,不是最后一个元素)、*it/it->,是裸指针操作的统一抽象
+
 
 ## 卡在哪 / 怎么解决的
 
@@ -49,6 +55,7 @@
 - [Day1 代码](../../cpp_warmup/week01_sensor_logger/scratch/day1.cpp)
 - [Day2 代码](../../cpp_warmup/week01_sensor_logger/scratch/day2.cpp)
 - [Day3 代码](../../cpp_warmup/week01_sensor_logger/scratch/day3.cpp)
+- [Day4 代码](../../cpp_warmup/week01_sensor_logger/scratch/day4.cpp)
 
 ## 下周计划微调
 
