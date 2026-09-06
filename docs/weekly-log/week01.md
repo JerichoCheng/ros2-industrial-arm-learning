@@ -56,6 +56,7 @@
 - [Day2 代码](../../cpp_warmup/week01_sensor_logger/scratch/day2.cpp)
 - [Day3 代码](../../cpp_warmup/week01_sensor_logger/scratch/day3.cpp)
 - [Day4 代码](../../cpp_warmup/week01_sensor_logger/scratch/day4.cpp)
+- [Day5 代码](../../cpp_warmup/week01_sensor_logger/scratch/day5.cpp)
 
 ## 下周计划微调
 
