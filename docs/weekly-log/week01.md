@@ -26,6 +26,12 @@
 - 析构函数 ~ClassName()：对象生命周期结束时自动调用，局部对象的析构顺序是构造顺序的倒序（LIFO）——是 Day4 RAII 的铺垫
 - 构造函数初始化列表 `: name(n), value(v)` vs 函数体内赋值：初始化列表是直接构造成员，函数体赋值是先构造后覆盖；const 成员只能用初始化列表赋初值，函数体赋值会报错（找不到 operator=）
 
+### Day 4
+- RAII 思想：栈对象析构自动释放资源，解决手动 delete 容易忘/被 early return 跳过的问题
+- unique_ptr：独占所有权，拷贝构造被 = delete，转移用 std::move
+- shared_ptr：引用计数共享所有权，use_count() 验证计数增减，reset() 立即触发释放
+- 优先用 make_shared 而非 new + shared_ptr 构造（单次分配、异常安全）
+
 
 ## 卡在哪 / 怎么解决的
 
