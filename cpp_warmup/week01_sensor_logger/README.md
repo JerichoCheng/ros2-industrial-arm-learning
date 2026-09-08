@@ -28,6 +28,6 @@ make
 
 ## Self-check
 
-- [ ] Can explain why `shared_ptr` is used here instead of a raw pointer or a plain object
-- [ ] Compiles cleanly with no warnings (with `-Wall` on)
-- [ ] Destructors fire correctly and visibly when the program exits
+- [x] Can explain why `shared_ptr` is used here instead of a raw pointer or a plain object
+- [x] Compiles cleanly with no warnings (with `-Wall` on)
+- [x] Destructors fire correctly and visibly when the program exits

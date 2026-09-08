@@ -25,11 +25,11 @@ Week 8       Project integration: grasping demo + debugging tools
 
 ## Week 0: Environment Setup
 
-- [ ] Install WSL2, distro Ubuntu 24.04 LTS
-- [ ] Install ROS 2 Jazzy Desktop (`sudo apt install ros-jazzy-desktop`)
-- [ ] VS Code + Remote-WSL + C/C++ extension + ROS extension
-- [ ] Configure Git, set up this repo
-- [ ] Verify: `ros2 topic list` works, `rviz2` opens a window
+- [x] Install WSL2, distro Ubuntu 24.04 LTS
+- [x] Install ROS 2 Jazzy Desktop (`sudo apt install ros-jazzy-desktop`)
+- [x] VS Code + Remote-WSL + C/C++ extension + ROS extension
+- [x] Configure Git, set up this repo
+- [x] Verify: `ros2 topic list` works, `rviz2` opens a window
 
 **Checkpoint**: `ros2 run demo_nodes_cpp talker` and `listener` can communicate normally.
 
