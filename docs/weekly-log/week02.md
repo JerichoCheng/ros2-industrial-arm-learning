@@ -15,11 +15,18 @@
 - 虚析构函数：base 指针释放派生类对象时，不加 virtual 会跳过派生类析构 → 内存泄漏
 - 析构链：派生类析构执行完，编译器自动调用基类析构（跟 virtual 无关，virtual 只决定从哪一层开始）
 
--## Week 2 Day 3 — Lambda 表达式 + std::function
+-## Day 3 — Lambda 表达式 + std::function
 - lambda 四段式语法:`[capture](参数) -> 返回类型 { 函数体 }`
 - 按值捕获 `[x]`(定义时拷贝,之后外部改变不影响)vs 按引用捕获 `[&x]`(操作原变量,同步变化)
 - 理解为什么 ROS 2 回调几乎都写 `[this]`——不只是读写变量,往往还要调用对象的其他成员函数
 - `std::function<返回类型(参数类型)>`:类型擦除包装器,统一"签名相同但类型各异"的可调用对象(lambda / 函数指针 / 仿函数),使其能作为参数传递、存成员变量
+
+-## Day 4：模板基础 (Templates)
+- 模板实例化 (template instantiation)：编译器在**编译期**根据传入的类型 T，为每个用到的类型生成一份专属代码，而非运行期统一处理
+- 函数模板语法：`template <typename T>` + 类型自动推导（如 `myMax(3, 5)` → T 推导为 int）
+- 理解 `std::vector<T>`、`std::shared_ptr<T>` 本质上是模板类，`vector<Sensor>` 就是 T=Sensor 时生成的代码
+- 权衡：多份实例化代码会增大可执行文件体积，换来的是零运行时开销 + 编译期类型检查
+- 提前认识了 ROS 2 里的模板语法：`create_publisher<std_msgs::msg::String>(...)`
 
 ## 卡在哪 / 怎么解决的
 
