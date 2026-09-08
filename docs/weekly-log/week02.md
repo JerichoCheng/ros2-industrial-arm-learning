@@ -40,15 +40,25 @@
   - 有头文件但没link库 → 编译能过,链接期报 `undefined reference`
 - `PRIVATE` vs `PUBLIC`:依赖是否需要"传播"给使用这个target的其他target。可执行文件(节点)一般用`PRIVATE`,因为不会被别的target链接。
 
+-## Day 6-7：综合小项目 —— 传感器继承体系 + 手写 CMake
+- **抽象基类 `Sensor`**：`read()` 声明为纯虚函数（`= 0`），析构函数声明为 `virtual`
+- **派生类 `TemperatureSensor` / `DistanceSensor`**：各自实现独立的 `read()` 物理模拟逻辑
+  （温度：20~30°C 区间平滑波动；距离：0.1~5m 正常漂移 + 30% 概率阶跃）
+- **`shared_ptr` 管理**：`std::vector<std::shared_ptr<Sensor>>` 多态存储，验证了基类指针析构时因 `virtual` 析构函数正确调用到子类析构
+- **lambda 回调**：`Sensor` 内部用 `std::function<void(const std::string&, double)>` 存回调，`main` 中用 lambda 注册，模拟 ROS2 `create_subscription` 的回调写法
+- **手写 `CMakeLists.txt`**：`add_library(sensor_lib ...)` 编译核心逻辑为静态库，`add_executable(sensor_app ...)` + `target_link_libraries(sensor_app PRIVATE sensor_lib)` 链接，`target_include_directories(sensor_lib PUBLIC include/)` 传递头文件路径
+
 ## 卡在哪 / 怎么解决的
 
 -## Day1-2：
 - 第一反应以为 C++ 方法调用默认按"实际对象类型"分派（跟 Python 一样），实际默认是静态绑定，加 virtual 才是动态绑定——这条最容易踩坑，以后见 C++ 继承代码要下意识确认有没有 virtual
 - override 关键字名字没猜对（猜成了 rewrite），但用法一说就理解了
 
+-## Day6-7：
+- 两个 `DistanceSensor` 实例最初用相同的 `mt19937` 种子（`42`）初始化，导致"看似随机"的读数序列实际完全重复。改用 `std::random_device{}()` 为每个实例生成独立种子后解决。这是多传感器仿真/单元测试里的典型坑。
 ## 检查点是否通过
 
-- [ ]
+- [x]
 
 ## 代码/产出链接
 
