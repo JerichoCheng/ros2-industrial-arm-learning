@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(robot_controller_project)
+
+add_executable(robot_controller main.cpp controller.cpp)
+
+target_link_libraries(robot_controller PRIVATE pthread)

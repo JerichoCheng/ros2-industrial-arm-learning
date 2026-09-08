@@ -28,6 +28,18 @@
 - 权衡：多份实例化代码会增大可执行文件体积，换来的是零运行时开销 + 编译期类型检查
 - 提前认识了 ROS 2 里的模板语法：`create_publisher<std_msgs::msg::String>(...)`
 
+-## Day 5: CMake基础
+- CMake的本质:不是编译器,是"构建系统生成器"——读CMakeLists.txt,生成对应平台的Makefile
+- 核心命令四件套:
+  - `project()` — 初始化项目
+  - `add_executable(target, sources...)` — 声明一个可执行文件目标
+  - `find_package(lib REQUIRED)` — 找库(只负责定位头文件/库文件路径)
+  - `target_link_libraries(target PRIVATE lib)` — 真正把库链接到目标上
+- 编译错误 vs 链接错误的区别:
+  - 缺头文件 → 编译期报错
+  - 有头文件但没link库 → 编译能过,链接期报 `undefined reference`
+- `PRIVATE` vs `PUBLIC`:依赖是否需要"传播"给使用这个target的其他target。可执行文件(节点)一般用`PRIVATE`,因为不会被别的target链接。
+
 ## 卡在哪 / 怎么解决的
 
 -## Day1-2：
@@ -42,6 +54,7 @@
 
 - [Day1-2 代码](../../cpp_warmup/week02_sensor_hierarchy/scratch/day1-2.cpp) 
 - [Day3 代码](../../cpp_warmup/week02_sensor_hierarchy/scratch/day3.cpp) 
+- [Day5 代码](../../cpp_warmup/week02_sensor_hierarchy/scratch/day5_CMakelists.txt) 
 
 ## 下周计划微调
 
