@@ -22,7 +22,7 @@ This isn't a "copy the tutorial" code dump — it's a **learning log with proces
 | Week | Topic | Status | Output |
 |---|---|---|---|
 | Week 0 | Environment setup (WSL2 + ROS 2 Jazzy) | ✅ Done | — |
-| Week 1-2 | C++ crash course | 🟨 In progress | [`cpp_warmup/`](./cpp_warmup/) |
+| Week 1-2 | C++ crash course | ✅ Done | [`cpp_warmup/`](./cpp_warmup/) |
 | Week 3 | ROS 2 core: packages / nodes | ⬜ Not started | [`ros2_ws/src/`](./ros2_ws/src/) |
 | Week 4 | Basic communication: topic / service / launch / params | ⬜ Not started | — |
 | Week 5 | Extended communication: action / custom interfaces / tf2 | ⬜ Not started | — |
