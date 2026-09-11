@@ -10,12 +10,16 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(arm_interfaces REQUIRED)
+
 
 # 1. 定义可执行文件目标与源文件
 add_executable(arm_basics_node src/arm_basics_node.cpp)
 add_executable(status_pub src/status_pub.cpp)
 add_executable(status_sub src/status_sub.cpp)
 add_executable(status_client src/status_client.cpp)
+add_executable(arm_move_server src/arm_move_server.cpp)
 
 ament_target_dependencies(arm_basics_node
   rclcpp
@@ -37,6 +41,7 @@ ament_target_dependencies(status_client
   std_srvs
 )
 
+ament_target_dependencies(arm_move_server rclcpp rclcpp_action arm_interfaces)
 
 # 3. 指定安装路径（确保 colcon install 阶段将可执行文件放入 lib/<package_name> 供 ros2 run 发现）
 install(TARGETS
@@ -52,6 +57,10 @@ install(DIRECTORY
   param
   DESTINATION share/${PROJECT_NAME}
 )
+
+install(TARGETS
+  arm_move_server
+  DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

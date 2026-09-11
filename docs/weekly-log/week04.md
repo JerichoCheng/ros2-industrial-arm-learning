@@ -130,7 +130,7 @@ Pub=TRANSIENT_LOCAL / Sub=TRANSIENT_LOCAL：订阅端启动瞬间收到 19 条�
 
 ## 检查点是否通过
 
-- [ ]
+- [x]
 
 ## 代码/产出链接
 
