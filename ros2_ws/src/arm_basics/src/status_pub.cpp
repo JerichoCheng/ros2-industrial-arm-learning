@@ -14,7 +14,7 @@ public:
   {
     publisher_ = this->create_publisher<std_msgs::msg::String>(
     "arm_heartbeat",
-    rclcpp::QoS(10)
+    rclcpp::QoS(rclcpp::KeepAll()).transient_local().reliable()
     );
     timer_ = this->create_wall_timer(1s, std::bind(&StatusPubNode::timer_callback, this));
   }
