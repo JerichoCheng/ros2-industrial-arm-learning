@@ -16,7 +16,10 @@ public:
     "arm_heartbeat",
     rclcpp::QoS(rclcpp::KeepAll()).transient_local().reliable()
     );
-    timer_ = this->create_wall_timer(1s, std::bind(&StatusPubNode::timer_callback, this));
+    double period_sec = this->declare_parameter<double>("publish_period_sec", 1.0);
+    timer_ = this->create_wall_timer(
+      std::chrono::duration<double>(period_sec),
+      std::bind(&StatusPubNode::timer_callback, this));
   }
 
 private:

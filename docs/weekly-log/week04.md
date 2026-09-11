@@ -93,6 +93,24 @@ wait_for_service() 不依赖 spin——它直接轮询 DDS 图事件判断服务
 async_send_request 的应答回调必须等 spin() 启动后才能被调度触发
 退出时机：回调函数内部处理完应答后调用 rclcpp::shutdown()，让 main() 里阻塞的 rclcpp::spin(node) 感知退出信号后自然返回，形成确定性闭环
 
+-## Day 4
+- launch 脚本的本质（3.2.1–3.2.2）
+launch 系统在逻辑层面是进程编排器：把"手动开多个终端敲 ros2 run"翻译成"声明式拓扑描述 + 统一父进程托管"——launch 引擎作为根进程统一 fork/exec 子进程、聚合日志、级联下发 SIGINT
+launch 脚本永远用 Python 写，跟被启动节点用什么语言实现完全无关——这是刻意的架构分层：节点实现层（C++/Python）决定"做什么"，编排层（永远 Python）决定"启动谁、传什么参数"。launch 引擎不关心也不需要知道自己拉起的是二进制还是脚本
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/) 与 install(TARGETS ...) 的本质差异：前者是纯文件拷贝（Deployment），不依赖编译；后者是注册编译产物，必须先有二进制才能装。两个目录（launch、param）目标路径相同时可以合并成一条 install(DIRECTORY) 语句，遵循"单点维护"原则
+同时 fork ≠ 同时构造完成：launch 把三个节点几乎同时拉起，但 status_client 依然能安全调用 status_sub 的服务，因为 wait_for_service(1s) 在客户端内部提供了时序解耦——launch 只保证"统一管理"，不保证"同步就绪"
+- rclcpp 参数系统（3.3.1）
+this->declare_parameter<double>("name", default) 是 rclcpp 特有的合并写法：一步完成"声明白名单"+"读取当前值（外部传了用外部的，没传用默认值）"，不像 rclpy 需要 declare_parameter + get_parameter 分两步。但如果要在运行时动态响应参数变化（add_on_set_parameters_callback），仍需显式读取，因为合并写法只在构造那一刻生效一次
+类型转换坑：declare_parameter<double> 返回纯数字，create_wall_timer 需要带单位语义的 std::chrono::duration 类型，用 std::chrono::duration<double>(period_sec) 显式构造（duration 是模板类，不是只有 1s/500ms 这几个预定义字面量）
+create_wall_timer 本身是模板函数，能同时接受 duration<double, ratio<1>> 和 duration<int64_t, milli> 等不同实例化，语法透明——跟 Week 2 学的模板"编译期按类型生成代码实例"是同一原理
+- YAML 参数文件（3.3.2）
+语法三条硬规则：缩进只能用空格（不能 Tab）、同层级左对齐、# 开头是注释
+YAML 最外层的 key 必须是目标节点的名字，因为参数系统底层是靠节点自带的隐式 service（/<node_name>/set_parameters 等）实现的，YAML 本质是"投递清单"，靠节点名路由
+关键坑——静默失效：--params-file 是节点在自己的 rclcpp::init 阶段读取的，如果节点当前名字（可能被 launch/命令行重命名过）在 YAML 里找不到匹配的顶层 key，不会报错，只会安静退回 declare_parameter 写的默认值。这类 bug 不会在日志里报警，只能靠"结果跟预期不符"倒推排查
+- launch 中集成参数（3.3.3）
+Node(..., parameters=[param_file]) 把 YAML 路径喂给节点，路径通过 get_package_share_directory('arm_basics') 获取，与 install(DIRECTORY ... DESTINATION share/${PROJECT_NAME}) 的安装路径一一对应
+DeclareLaunchArgument('params_file', default_value=...) + LaunchConfiguration('params_file') 组合，把原本写死在 launch 文件里的 YAML 路径变成命令行可覆盖的启动参数，验证了 ros2 launch ... params_file:=xxx.yaml 能动态切换配置文件
+
 ## 卡在哪 / 怎么解决的
 
 - transient_local + keep_all 晚到补发
@@ -105,6 +123,10 @@ Pub=TRANSIENT_LOCAL / Sub=TRANSIENT_LOCAL：订阅端启动瞬间收到 19 条�
 - install(TARGETS ...) 合并方向反了：三段渐进式的 install(TARGETS)（分别装 1/2/3 个可执行文件）误删了内容最全的两段，只留最初最不完整的一段，导致 status_pub/status_sub 编译成功但 ros2 run 报 "No executable found"——编译（build）成功 ≠ 安装（install）完整，两者是独立步骤
 - 改代码后忘记重新 colcon build：status_client.cpp 和 CMakeLists.txt 都改对了，但没有重新构建就直接 ros2 run，导致仍然找不到可执行文件
 - 跨天遗留的 QoS 警告清理：rclcpp::QoS(0) 构造时先天产生"深度=0 但历史策略是 KEEP_LAST"的无意义中间态，即使后续链式调用 .keep_all() 也无法消除该警告；改用 rclcpp::QoS(rclcpp::KeepAll()) 从构造起点就直接是 KEEP_ALL 语义，警告消失
+
+- 两次"忘记保存"：一次是 status_pub.cpp 改了 create_wall_timer 没保存导致行为没变；另一次更隐蔽——粘贴新版 bringup.launch.py 内容时误粘进了 pub_config.yaml，导致两个文件互相污染，colcon build 因为是纯资源拷贝（不涉及编译），即使内容错了也不会报错拦截，只会在耗时上出现"0.2 秒秒退"这种间接信号
+- 修复方式：改用 cat > file << 'EOF' ... EOF 直接在终端里整体覆写文件内容，避免编辑器多窗口粘贴错位的风险
+有趣的时序观察：发布周期压到 0.2s 后，status_client 的 reset 请求第一次与心跳消息的到达顺序产生了可观察的竞争（Reset count from 1 to 0，而不是 Day 3 时 1 秒周期下必然的 0 to 0）——印证了"多个独立事件的到达顺序不存在全局保证"这一分布式系统的基本特性
 
 ## 检查点是否通过
 
