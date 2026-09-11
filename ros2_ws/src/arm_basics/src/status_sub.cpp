@@ -10,10 +10,9 @@ public:
   {
     // 回调函数接收一条消息的 const 共享指针，并用 std::placeholders::_1 占位传参
     subscription_ = this->create_subscription<std_msgs::msg::String>(
-      "arm_heartbeat",
-      10,
-      std::bind(&StatusSubNode::topic_callback, this, std::placeholders::_1)
-    );
+    "arm_heartbeat",
+    rclcpp::QoS(0).keep_all().transient_local().reliable(),
+    std::bind(&StatusSubNode::topic_callback, this, std::placeholders::_1));
   }
 
 private:
