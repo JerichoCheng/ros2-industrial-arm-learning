@@ -12,6 +12,11 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(arm_interfaces REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(arm_interfaces REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 
 # 1. 定义可执行文件目标与源文件
@@ -20,6 +25,31 @@ add_executable(status_pub src/status_pub.cpp)
 add_executable(status_sub src/status_sub.cpp)
 add_executable(status_client src/status_client.cpp)
 add_executable(arm_move_server src/arm_move_server.cpp)
+add_executable(arm_move_client src/arm_move_client.cpp)
+add_executable(static_tf_broadcaster src/static_tf_broadcaster.cpp)
+add_executable(dynamic_tf_broadcaster src/dynamic_tf_broadcaster.cpp)
+add_executable(tf_listener src/tf_listener.cpp)
+
+
+ament_target_dependencies(tf_listener
+  rclcpp
+  geometry_msgs
+  tf2
+  tf2_ros
+)
+
+ament_target_dependencies(dynamic_tf_broadcaster
+  rclcpp
+  geometry_msgs
+  tf2
+  tf2_ros
+)
+
+ament_target_dependencies(arm_move_client
+  rclcpp
+  rclcpp_action
+  arm_interfaces
+)
 
 ament_target_dependencies(arm_basics_node
   rclcpp
@@ -43,12 +73,16 @@ ament_target_dependencies(status_client
 
 ament_target_dependencies(arm_move_server rclcpp rclcpp_action arm_interfaces)
 
-# 3. 指定安装路径（确保 colcon install 阶段将可执行文件放入 lib/<package_name> 供 ros2 run 发现）
+ament_target_dependencies(static_tf_broadcaster rclcpp tf2 tf2_ros geometry_msgs)
+
 install(TARGETS
   arm_basics_node
   status_pub
   status_sub
   status_client
+  static_tf_broadcaster
+  dynamic_tf_broadcaster
+  tf_listener 
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -61,6 +95,16 @@ install(DIRECTORY
 install(TARGETS
   arm_move_server
   DESTINATION lib/${PROJECT_NAME})
+
+install(TARGETS
+  arm_basics_node
+  status_pub
+  status_sub
+  status_client
+  arm_move_server
+  arm_move_client    # <-- 加在这里
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
