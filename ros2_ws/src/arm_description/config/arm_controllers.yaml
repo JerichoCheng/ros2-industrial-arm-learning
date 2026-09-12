@@ -1,0 +1,26 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # 控制更新频率 (Hz)
+
+    # 声明控制器实例及其对应的官方插件类型
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+arm_controller:
+  ros__parameters:
+    joints:
+      - joint1
+      - joint2
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position
+      - velocity
+
+    open_loop_control: false
+    allow_nonzero_velocity_at_trajectory_start: true

@@ -2,13 +2,6 @@ import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-from launch.substitutions import Command
-from launch_ros.parameter_descriptions import ParameterValue
-
-robot_description = ParameterValue(
-    Command(['xacro ', xacro_file_path]),
-    value_type=str
-)
 
 def generate_launch_description():
     urdf_path = os.path.join(

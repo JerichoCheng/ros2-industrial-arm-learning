@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<robot name="simple_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ==================== 参数定义 (PROPERTIES) ==================== -->
+  <!-- Base Link 属性 -->
+  <xacro:property name="base_r" value="0.1"/>
+  <xacro:property name="base_h" value="0.1"/>
+  <xacro:property name="base_m" value="5.0"/>
+
+  <!-- Link 1 属性 -->
+  <xacro:property name="link1_r" value="0.05"/>
+  <xacro:property name="link1_h" value="0.6"/>
+  <xacro:property name="link1_m" value="2.0"/>
+
+  <!-- Link 2 属性 -->
+  <xacro:property name="link2_r" value="0.04"/>
+  <xacro:property name="link2_h" value="0.4"/>
+  <xacro:property name="link2_m" value="1.0"/>
+
+  <!-- ==================== 宏定义 (MACROS) ==================== -->
+  <!-- 沿 local z 轴向上的实心圆柱惯性张量宏，支持通过 block 参数传入质心位姿 -->
+  <xacro:macro name="cylinder_inertial_z" params="m r h *origin">
+    <inertial>
+      <xacro:insert_block name="origin"/>
+      <mass value="${m}"/>
+      <inertia 
+        ixx="${(m/12.0) * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+        iyy="${(m/12.0) * (3*r*r + h*h)}" iyz="0.0"
+        izz="${(m/2.0) * (r*r)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ==================== BASE LINK ==================== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${base_h/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${base_h}" radius="${base_r}"/>
+      </geometry>
+      <material name="dark_gray">
+        <color rgba="0.3 0.3 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${base_h/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${base_h}" radius="${base_r}"/>
+      </geometry>
+    </collision>
+    <xacro:cylinder_inertial_z m="${base_m}" r="${base_r}" h="${base_h}">
+      <origin xyz="0 0 ${base_h/2}" rpy="0 0 0"/>
+    </xacro:cylinder_inertial_z>
+  </link>
+
+  <!-- ==================== LINK 1 ==================== -->
+  <link name="link1">
+    <visual>
+      <origin xyz="0 0 ${link1_h/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${link1_h}" radius="${link1_r}"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.1 0.3 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${link1_h/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${link1_h}" radius="${link1_r}"/>
+      </geometry>
+    </collision>
+    <xacro:cylinder_inertial_z m="${link1_m}" r="${link1_r}" h="${link1_h}">
+      <origin xyz="0 0 ${link1_h/2}" rpy="0 0 0"/>
+    </xacro:cylinder_inertial_z>
+  </link>
+
+  <!-- ==================== LINK 2 ==================== -->
+  <link name="link2">
+    <visual>
+      <origin xyz="0 0 ${link2_h/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${link2_h}" radius="${link2_r}"/>
+      </geometry>
+      <material name="orange">
+        <color rgba="0.9 0.5 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${link2_h/2}" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="${link2_h}" radius="${link2_r}"/>
+      </geometry>
+    </collision>
+    <xacro:cylinder_inertial_z m="${link2_m}" r="${link2_r}" h="${link2_h}">
+      <origin xyz="0 0 ${link2_h/2}" rpy="0 0 0"/>
+    </xacro:cylinder_inertial_z>
+  </link>
+  <!-- ==================== JOINT 1 ==================== -->
+  <joint name="joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link1"/>
+    <!-- 安装在 base_link 顶部表面 -->
+    <origin xyz="0 0 ${base_h}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <!-- 基础限位配置 -->
+    <limit lower="-3.14159" upper="3.14159" effort="100.0" velocity="3.0"/>
+  </joint>
+
+  <!-- ==================== JOINT 2 ==================== -->
+  <joint name="joint2" type="revolute">
+    <parent link="link1"/>
+    <child link="link2"/>
+    <!-- 安装在 link1 顶部表面 -->
+    <origin xyz="0 0 ${link1_h}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <!-- 基础限位配置 -->
+    <limit lower="-3.14159" upper="3.14159" effort="50.0" velocity="3.0"/>
+  </joint>
+
+ <!-- ==================== GAZEBO ROS2 CONTROL PLUGIN ==================== -->
+<gazebo>
+  <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+    <parameters>/home/jerichocheng/projects/ros2-industrial-arm-learning/ros2_ws/install/arm_description/share/arm_description/config/arm_controllers.yaml</parameters>
+  </plugin>
+</gazebo>
+
+ <!-- ==================== ROS 2 CONTROL ==================== -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <!-- Joint 1 接口 -->
+    <joint name="joint1">
+      <command_interface name="position">
+        <param name="min">-3.14159</param>
+        <param name="max">3.14159</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <!-- Joint 2 接口 -->
+    <joint name="joint2">
+      <command_interface name="position">
+        <param name="min">-3.14159</param>
+        <param name="max">3.14159</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+</robot>
