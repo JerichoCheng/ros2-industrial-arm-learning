@@ -25,8 +25,8 @@ This isn't a "copy the tutorial" code dump — it's a **learning log with proces
 | Week 1-2 | C++ crash course | ✅ Done | [`cpp_warmup/`](./cpp_warmup/) |
 | Week 3 | ROS 2 core: packages / nodes | ✅ Done | [`ros2_ws/src/`](./ros2_ws/src/) |
 | Week 4 | Basic communication: topic / service / launch / params | ✅ Done | — |
-| Week 5 | Extended communication: action / custom interfaces / tf2 | 🟨 In progress | — |
-| Week 6 | Simulation: URDF / Gazebo / ros2_control | ⬜ Not started | — |
+| Week 5 | Extended communication: action / custom interfaces / tf2 | ✅ Done | — |
+| Week 6 | Simulation: URDF / Gazebo / ros2_control | 🟨 In progress | — |
 | Week 7 | Intro to MoveIt2 motion planning | ⬜ Not started | — |
 | Week 8 | Project integration: grasping demo | ⬜ Not started | — |
 
