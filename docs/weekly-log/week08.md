@@ -24,9 +24,14 @@
 - **`rqt_graph`**：图形化查看节点-话题连接关系；默认下拉框是 "Nodes only"（只画节点，不画连线），要看实际的发布-订阅连线需切到 "Nodes/Topics (active)"。
 - **排查闭环方法论**：制造问题（起 `bag play --loop`）→ 观察异常状态（`Publisher count: 2`）→ 移除干扰源（停 `bag play`）→ 确认状态恢复（`Publisher count` 掉回 1）。
 
+- ## Day 3：设计并实现抓取序列节点（pick_place_demo.cpp）
+- **`MoveGroupInterface` 的 group 绑定是构造时定死的**：无法运行时切换控制目标，需要控制多个 group（`panda_arm` + `hand`）时应各自构造独立对象，而不是共用一个或反复重新构造（后者有action client初始化、等待服务就绪的显著开销）。
+- **SRDF 里的 `group_state`（命名姿态）**：Panda 的 `hand` group 预定义了 `open`（0.035/0.035）和 `close`（0/0）两个命名姿态，可以 `setNamedTarget()` 直接调用，不用手算关节角度。同时存在一个 `panda_arm_hand` 组合 group（用于手臂+夹爪需要联动规划的场景），本次顺序执行的抓取序列用不上。
+- **`move()` vs `plan()+execute()`**：两者在"失败能否被捕获"上没有本质区别（`move()` 一样返回 `MoveItErrorCode` 可以判断）；真正的区别是 `plan()+execute()` 拆开后，执行前多了一个能检查 `Plan` 对象的窗口（比如以后接真实硬件时加一道人工确认关卡）。夹爪这种关节空间点到点插值几乎不会规划出意外轨迹，用 `move()` 省事；手臂在三维空间里跑轨迹，保留检查窗口更稳妥。
+- **`execute()`/`move()` 的阻塞语义**：底层依赖 `FollowJointTrajectory`/`GripperCommand` 等 action 的完整交互（等到 Result 才返回），返回时机械臂必然已停稳，`sleep_for()` 在功能正确性上是多余的，纯粹用于演示时的视觉节奏缓冲。
+
 ## 卡在哪 / 怎么解决的
 
-| 问题 | 花了多久 | 怎么解决的 |
 1. **新终端未 source**：又一次踩了"新开终端不会自动 source `install/setup.bash`"的老坑，这次是 `ws_moveit` underlay 和 `ros2_ws` overlay 两层全空，导致 `ros2 pkg list`/`ros2 run` 找不到 `arm_moveit_demo`。用链式 source 修复：
 ```bash
    source ~/ws_moveit/install/setup.bash
@@ -36,6 +41,13 @@
 
 - **`ros2 bag play` 是一次性任务，不会像常驻节点一样等你**：第一次没加 `--loop`，切终端敲验证命令时回放早已放完退出，看到的是"回放结束后"的假阴性结果，不是回放进行中的状态。加 `--loop` 后才稳定复现出 `Publisher count: 2`。
 - **孤儿终端/未清理进程**：中途出现过一个多余的 `_ros2cli_` 订阅节点，是某个 `ros2 topic echo` 终端没有真正退出的残留——延续了 Week3 Day4 daemon 节点排查、Week5 Day3 环境污染排查里记过的同一类"先怀疑残留进程，再怀疑底层机制"的习惯。
+
+1. **编译期链接 vs 运行期动态加载是两回事**：`colcon build` 时已经链接过 `libmoveit_move_group_interface.so`，但运行时报 `cannot open shared object file`——因为只 source 了 `ros2_ws` overlay，没 source `ws_moveit` underlay，`LD_LIBRARY_PATH` 里缺了库文件实际所在路径。跟"包索引找不到"（`AMENT_PREFIX_PATH`）是两套独立的环境变量机制，但病根同源：终端环境变量不完整。
+2. **`robot_description` 参数超时**：直接跑 `pick_place_demo` 而没有先在另一个终端启动 Panda 仿真栈（`move_group`/`robot_state_publisher`/RViz2），`MoveGroupInterface` 构造时等 10 秒拿不到机器人模型直接报错退出。
+3. **`moveit2_tutorials` 的 `demo.launch.py`（main 分支）已经不是 Panda demo 了**——现在默认配置的是 Kinova Gen3 + Robotiq 2F-85 夹爪（`mock_sensor_commands` 报错正是 Kinova 描述包 `kortex_description` 里的参数，与 Panda 无关）。改用 `moveit_resources_panda_moveit_config` 自带的 `demo.launch.py` 才是正确路径——这个包不受 `moveit2_tutorials` 改版影响，依然是完整的 Panda 配置。
+4. **包名认知有误**：以为包名是 `panda_moveit_config`，实际 `package.xml` 里注册的真实名字是 `moveit_resources_panda_moveit_config`（带前缀）。之前用文件系统路径能直接读到 SRDF，从未暴露这个问题；这次改用 `ros2 pkg prefix`/`ros2 launch` 按包名查找才第一次撞上。
+5. **夹爪 action 类型不匹配（本次最深的一处坑）**：Step1 开夹爪报 `Action client not connected to action server: panda_hand_controller/gripper_cmd`——控制器本身已正确加载激活，规划也成功，卡在"执行阶段把轨迹发给 action server"这一步。根因：`gripper_moveit_controllers.yaml` 里写的是旧式 `type: GripperCommand`，但 `ros2_controllers.yaml` 里 `panda_hand_controller` 实际类型是 `parallel_gripper_action_controller/GripperActionController`（Jazzy 起的新控制器），对外暴露的是 `control_msgs::action::ParallelGripperCommand`，与旧类型不匹配（`ros2 action list -t` 同时列出两个类型正是这个不匹配的直接证据）。这是 `panda_moveit_config` 官方配置包本身没跟上 MoveIt2 的 `parallel_gripper_action_controller` 迁移节奏（对应官方 PR moveit/moveit2#3260, Jazzy backport 2025-01）留下的遗留问题，不是本地环境或操作错误。修法：把 `gripper_moveit_controllers.yaml` 里 `panda_hand_controller` 的 `type` 改成 `ParallelGripperCommand`，重新编译该包并重启仿真栈。
+
 
 ## 检查点是否通过
 
