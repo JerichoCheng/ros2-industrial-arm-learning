@@ -6,9 +6,7 @@ An 8-week, self-directed learning project: going from **zero C++ experience** to
 
 ## Demo
 
-*Video/GIF coming soon.*
-
-<!-- ![pick-and-place demo](docs/demo.gif) -->
+![pick-and-place demo](docs/demo.gif)
 
 The demo runs a Franka Panda arm in simulation through a full pick-and-place sequence: open gripper → move to pick pose → close gripper → move to place pose.
 
