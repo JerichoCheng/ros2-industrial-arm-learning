@@ -12,6 +12,21 @@ find_package(moveit_ros_planning_interface REQUIRED)
 
 
 add_executable(first_motion src/first_motion.cpp)
+# 1. 声明新的可执行文件 target
+add_executable(debug_test src/debug_test.cpp)
+
+# 2. 链接 MoveIt2 和 ROS 2 的依赖库（直接复用你现有节点的依赖列表）
+ament_target_dependencies(debug_test
+  rclcpp
+  moveit_ros_planning_interface
+)
+
+# 3. 安装到 lib 目录，保证 ros2 run 能找到它
+install(TARGETS
+  debug_test
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 target_link_libraries(first_motion
   rclcpp::rclcpp
   moveit_ros_planning_interface::moveit_move_group_interface)
