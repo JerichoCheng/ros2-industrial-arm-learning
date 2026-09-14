@@ -1,7 +1,5 @@
 # Week 8：项目整合 · 学习日志
 
-> 日期：YYYY-MM-DD ~ YYYY-MM-DD
-
 ## 本周目标
 
 -
@@ -24,11 +22,16 @@
 - **`rqt_graph`**：图形化查看节点-话题连接关系；默认下拉框是 "Nodes only"（只画节点，不画连线），要看实际的发布-订阅连线需切到 "Nodes/Topics (active)"。
 - **排查闭环方法论**：制造问题（起 `bag play --loop`）→ 观察异常状态（`Publisher count: 2`）→ 移除干扰源（停 `bag play`）→ 确认状态恢复（`Publisher count` 掉回 1）。
 
-- ## Day 3：设计并实现抓取序列节点（pick_place_demo.cpp）
+- ## Day 3-5
 - **`MoveGroupInterface` 的 group 绑定是构造时定死的**：无法运行时切换控制目标，需要控制多个 group（`panda_arm` + `hand`）时应各自构造独立对象，而不是共用一个或反复重新构造（后者有action client初始化、等待服务就绪的显著开销）。
 - **SRDF 里的 `group_state`（命名姿态）**：Panda 的 `hand` group 预定义了 `open`（0.035/0.035）和 `close`（0/0）两个命名姿态，可以 `setNamedTarget()` 直接调用，不用手算关节角度。同时存在一个 `panda_arm_hand` 组合 group（用于手臂+夹爪需要联动规划的场景），本次顺序执行的抓取序列用不上。
 - **`move()` vs `plan()+execute()`**：两者在"失败能否被捕获"上没有本质区别（`move()` 一样返回 `MoveItErrorCode` 可以判断）；真正的区别是 `plan()+execute()` 拆开后，执行前多了一个能检查 `Plan` 对象的窗口（比如以后接真实硬件时加一道人工确认关卡）。夹爪这种关节空间点到点插值几乎不会规划出意外轨迹，用 `move()` 省事；手臂在三维空间里跑轨迹，保留检查窗口更稳妥。
 - **`execute()`/`move()` 的阻塞语义**：底层依赖 `FollowJointTrajectory`/`GripperCommand` 等 action 的完整交互（等到 Result 才返回），返回时机械臂必然已停稳，`sleep_for()` 在功能正确性上是多余的，纯粹用于演示时的视觉节奏缓冲。
+
+## Day 6
+- **`LaunchDescription` 内的动作默认并发启动**：不是按列表顺序等前一个就绪才启动下一个，需要 `TimerAction`（纯墙钟延迟）或 `RegisterEventHandler`（事件驱动）人为制造依赖顺序。对这种"拉起一整套大型仿真栈+业务节点"的场景，`TimerAction` 给一个宽松估计的延迟窗口是最实用的做法。
+- **`IncludeLaunchDescription` + `get_package_share_directory()`**：把第三方包（`moveit_resources_panda_moveit_config`）的 `demo.launch.py` 整个引入进自己的 launch 文件，用包名动态查路径而不是写死绝对路径——原理和 `ros2 pkg prefix`/`AMENT_PREFIX_PATH` 包索引机制一致，保证换机器/换用户名依然能跑。
+- **两层等待机制的分工**：`TimerAction` 的延迟只防最坏情况（系统整体还没起来），真正兜住"controller 刚激活、还没完全就绪"这种慢半拍场景的，是 `MoveGroupInterface` 构造时自身对 action client 连接的阻塞行为（构造函数会一直等到能连上对应 planning group 的 action server 才返回）——这次实测日志里 `panda_hand_controller` 激活和 `pick_place_demo` 实际发出开爪请求只差 0.49 秒，验证了这个兜底机制真实生效。
 
 ## 卡在哪 / 怎么解决的
 
