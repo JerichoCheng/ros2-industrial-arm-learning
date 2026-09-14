@@ -45,7 +45,13 @@ install(TARGETS
   pick_place_demo
   DESTINATION lib/${PROJECT_NAME}
 )
-  
+
+# 将 launch 目录拷贝到 share/${PROJECT_NAME}/ 下
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
