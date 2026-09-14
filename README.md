@@ -3,7 +3,7 @@
 > Documenting my 8-week journey from zero C++ experience to building a simplified simulated industrial-arm grasping demo with ROS 2.
 > Textbook: *ROS 2 Robot Programming in Practice — Modern C++ and Python 3* · Environment: Windows + WSL2 + Ubuntu 24.04 + ROS 2 Jazzy
 
-[![Progress](https://img.shields.io/badge/progress-week%207%2F8-yellow)](./ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-week%208%2F8-yellow)](./ROADMAP.md)
 [![ROS2](https://img.shields.io/badge/ROS%202-Jazzy-blue)](https://docs.ros.org/en/jazzy/)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
@@ -27,8 +27,8 @@ This isn't a "copy the tutorial" code dump — it's a **learning log with proces
 | Week 4 | Basic communication: topic / service / launch / params | ✅ Done | — |
 | Week 5 | Extended communication: action / custom interfaces / tf2 | ✅ Done | — |
 | Week 6 | Simulation: URDF / Gazebo / ros2_control | ✅ Done | — |
-| Week 7 | Intro to MoveIt2 motion planning | 🟨 In progress | — |
-| Week 8 | Project integration: grasping demo | ⬜ Not started | — |
+| Week 7 | Intro to MoveIt2 motion planning | ✅ Done| — |
+| Week 8 | Project integration: grasping demo | 🟨 In progress | — |
 
 > Legend: ⬜ Not started · 🟨 In progress · ✅ Done — check these off here as each week wraps up. The progress bar doesn't lie.
 
