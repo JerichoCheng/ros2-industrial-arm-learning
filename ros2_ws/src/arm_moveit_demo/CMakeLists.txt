@@ -8,6 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 
 
@@ -24,6 +25,7 @@ ament_target_dependencies(debug_test
 
 ament_target_dependencies(pick_place_demo
   rclcpp
+  geometry_msgs
   moveit_ros_planning_interface
 )
 
@@ -46,9 +48,10 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# 将 launch 目录拷贝到 share/${PROJECT_NAME}/ 下
+# 将 launch 和 config 目录拷贝到 share/${PROJECT_NAME}/ 下
 install(DIRECTORY
   launch
+  config
   DESTINATION share/${PROJECT_NAME}
 )
 
