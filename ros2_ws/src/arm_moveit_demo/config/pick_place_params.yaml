@@ -1,0 +1,5 @@
+pick_place_demo:
+  ros__parameters:
+    # 位姿格式: [x, y, z, qx, qy, qz, qw]
+    pick_pose: [0.28, -0.2, 0.5, 1.0, 0.0, 0.0, 0.0]
+    place_pose: [0.28, 0.2, 0.5, 1.0, 0.0, 0.0, 0.0]

@@ -83,6 +83,16 @@ Run the full demo with a single command — this brings up the Panda simulation 
 ros2 launch arm_moveit_demo pick_place_demo.launch.py
 ```
 
+To override either target pose for one launch, pass a seven-element pose array
+`[x, y, z, qx, qy, qz, qw]` as a launch argument. Omit an argument to retain the
+value in `arm_moveit_demo/config/pick_place_params.yaml`.
+
+```bash
+ros2 launch arm_moveit_demo pick_place_demo.launch.py \
+  pick_pose:="[0.28, -0.20, 0.50, 1.0, 0.0, 0.0, 0.0]" \
+  place_pose:="[0.28, 0.20, 0.50, 1.0, 0.0, 0.0, 0.0]"
+```
+
 Expected sequence: RViz2 opens with the Panda arm loaded, a short pause while the simulation stack finishes initializing, then the gripper opens, the arm moves to the pick pose, the gripper closes, and the arm moves to the place pose — logged step-by-step in the terminal.
 
 ---
