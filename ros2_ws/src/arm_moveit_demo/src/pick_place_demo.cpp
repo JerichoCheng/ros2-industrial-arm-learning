@@ -5,6 +5,9 @@
 #include <vector>
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <control_msgs/action/follow_joint_trajectory.hpp>
+#include <control_msgs/action/parallel_gripper_command.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit/move_group_interface/move_group_interface.hpp>
 
@@ -13,6 +16,7 @@ using namespace std::chrono_literals;
 namespace {
 
 constexpr double kCurrentStateTimeoutSeconds = 10.0;
+constexpr auto kControllerActionTimeout = std::chrono::seconds(10);
 
 // 从 ROS2 参数读取位姿 [x, y, z, qx, qy, qz, qw]；未显式设置时回退到 default_values
 bool loadPoseParam(const rclcpp::Node::SharedPtr & node, const std::string & param_name,
@@ -50,6 +54,29 @@ bool waitForCurrentState(moveit::planning_interface::MoveGroupInterface & group,
     "Ensure joint_state_broadcaster and controllers are active before starting this demo.",
     kCurrentStateTimeoutSeconds, group_name.c_str());
   return false;
+}
+
+template <typename ActionT>
+bool waitForActionServer(const rclcpp::Node::SharedPtr & node,
+                         const std::string & action_name) {
+  auto client = rclcpp_action::create_client<ActionT>(node, action_name);
+  if (client->wait_for_action_server(kControllerActionTimeout)) {
+    RCLCPP_INFO(node->get_logger(), "Controller action server ready: %s", action_name.c_str());
+    return true;
+  }
+
+  RCLCPP_ERROR(node->get_logger(),
+    "Timed out waiting %lld seconds for controller action server '%s'. "
+    "Do not execute trajectories until the controller is active.",
+    static_cast<long long>(kControllerActionTimeout.count()), action_name.c_str());
+  return false;
+}
+
+bool waitForControllerActionServers(const rclcpp::Node::SharedPtr & node) {
+  return waitForActionServer<control_msgs::action::FollowJointTrajectory>(
+           node, "panda_arm_controller/follow_joint_trajectory") &&
+         waitForActionServer<control_msgs::action::ParallelGripperCommand>(
+           node, "panda_hand_controller/gripper_cmd");
 }
 
 bool moveGripperToNamedTarget(moveit::planning_interface::MoveGroupInterface & hand_group,
@@ -122,6 +149,15 @@ int main(int argc, char** argv) {
   geometry_msgs::msg::Pose place_pose;
   if (!loadPoseParam(node, "pick_pose", {0.28, -0.2, 0.5, 1.0, 0.0, 0.0, 0.0}, pick_pose) ||
       !loadPoseParam(node, "place_pose", {0.28, 0.2, 0.5, 1.0, 0.0, 0.0, 0.0}, place_pose)) {
+    rclcpp::shutdown();
+    spinner.join();
+    return 1;
+  }
+
+  // The launch TimerAction is only a coarse process-start delay. Confirm that
+  // both ros2_control action endpoints are accepting goals before issuing the
+  // first MoveIt execution request.
+  if (!waitForControllerActionServers(node)) {
     rclcpp::shutdown();
     spinner.join();
     return 1;

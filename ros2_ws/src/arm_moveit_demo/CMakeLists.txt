@@ -8,6 +8,8 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(control_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 
@@ -25,6 +27,8 @@ ament_target_dependencies(debug_test
 
 ament_target_dependencies(pick_place_demo
   rclcpp
+  rclcpp_action
+  control_msgs
   geometry_msgs
   moveit_ros_planning_interface
 )
