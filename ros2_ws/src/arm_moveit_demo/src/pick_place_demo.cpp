@@ -53,20 +53,22 @@ bool waitForCurrentState(moveit::planning_interface::MoveGroupInterface & group,
 }
 
 bool moveGripperToNamedTarget(moveit::planning_interface::MoveGroupInterface & hand_group,
-                              const rclcpp::Logger & logger, const std::string & target_name,
-                              const std::string & description) {
+                               const rclcpp::Logger & logger, const std::string & target_name,
+                               const std::string & description) {
+  // MoveGroupInterface waits for move_action during construction. Refresh its
+  // current state immediately before the combined plan-and-execute request so
+  // the first gripper goal is not based on startup-time state.
+  if (!waitForCurrentState(hand_group, logger, "hand")) {
+    return false;
+  }
+  hand_group.setStartStateToCurrentState();
+
   if (!hand_group.setNamedTarget(target_name)) {
     RCLCPP_ERROR(logger, "Named gripper target '%s' is not defined.", target_name.c_str());
     return false;
   }
 
-  moveit::planning_interface::MoveGroupInterface::Plan plan;
-  if (hand_group.plan(plan) != moveit::core::MoveItErrorCode::SUCCESS) {
-    RCLCPP_ERROR(logger, "Planning %s failed!", description.c_str());
-    return false;
-  }
-
-  if (hand_group.execute(plan) != moveit::core::MoveItErrorCode::SUCCESS) {
+  if (hand_group.move() != moveit::core::MoveItErrorCode::SUCCESS) {
     RCLCPP_ERROR(logger, "Execution %s failed!", description.c_str());
     return false;
   }
