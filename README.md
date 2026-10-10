@@ -4,6 +4,14 @@ An 8-week, self-directed learning project: going from **zero C++ experience** to
 
 ---
 
+## Project Evolution
+
+- Phase I — ROS 2 + MoveIt simulated Pick-and-Place — Completed (`v0.1.0`)
+- Phase II — Reliability, calibration and mobile robotics — Active
+- Final Goal — Integrated industrial manipulation system
+- Current status: **Phase II — Week 1: Execution Reliability & Parameterized Targets**
+- [Project roadmap](ROADMAP.md)
+
 ## Demo
 
 ![pick-and-place demo](docs/demo.gif)
